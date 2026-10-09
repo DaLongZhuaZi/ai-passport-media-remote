@@ -297,6 +297,12 @@ static void start_advertising(void)
     fields.uuids16_is_complete = 1;
     fields.appearance = 0x03C1; // 键盘外观,确保安卓按输入设备处理
     fields.appearance_is_present = 1;
+    // 设备名直接放广播包(而非仅扫描响应):部分安卓机型只认广播包里的名字,
+    // 名字只在响应包里时会被显示为无名设备甚至被系统列表过滤。
+    // 内容合计 3+4+4+17=28 字节,未超 31 字节上限。
+    fields.name = (uint8_t *)DEVICE_NAME;
+    fields.name_len = strlen(DEVICE_NAME);
+    fields.name_is_complete = 1;
     int rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0) { ESP_LOGE(TAG, "adv set fields rc=%d", rc); return; }
 
